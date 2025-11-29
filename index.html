@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Channel</title>
+    <style>
+        /* Previous styles remain the same... */
+        /* Previous Telegram UI styles remain the same */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --tg-bg: #0f0f0f;
+            --tg-bg-secondary: #1e1e1e;
+            --tg-bg-tertiary: #2d2d2d;
+            --tg-text: #ffffff;
+            --tg-text-secondary: #8e8e93;
+            --tg-accent: #2fabff;
+            --tg-accent-hover: #1e9aeb;
+            --tg-border: #3d3d3d;
+            --tg-success: #34c759;
+            --tg-error: #ff3b30;
+            --tg-rating: #ffd700;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-bg);
+            color: var(--tg-text);
+            line-height: 1.4;
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 60px;
+        }
+
+        /* Telegram Header -保持不变 */
+        .tg-header {
+            background: var(--tg-bg-secondary);
+            border-bottom: 1px solid var(--tg-border);
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .tg-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .tg-header-info h1 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .tg-online {
+            font-size: 13px;
+            color: var(--tg-text-secondary);
+        }
+
+        .tg-btn {
+            background: none;
+            border: none;
+            color: var(--tg-text);
+            font-size: 20px;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .tg-btn:hover {
+            background: var(--tg-bg-tertiary);
+        }
+
+        /* Search Box -保持不变 */
+        .tg-search-container {
+            padding: 12px 16px;
+            background: var(--tg-bg);
+            border-bottom: 1px solid var(--tg-border);
+        }
+
+        .tg-search-box {
+            display: flex;
+            align-items: center;
+            background: var(--tg-bg-tertiary);
+            border-radius: 10px;
+            padding: 8px 12px;
+        }
+
+        .tg-search-icon {
+            color: var(--tg-text-secondary);
+            margin-right: 8px;
+        }
+
+        .tg-search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--tg-text);
+            font-size: 16px;
+            outline: none;
+        }
+
+        .tg-search-input::placeholder {
+            color: var(--tg-text-secondary);
+        }
+
+        /* New Grid Layout for Movies */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--tg-border);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .view-all {
+            color: var(--tg-accent);
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 16px;
+        }
+
+        .movie-card {
+            background: var(--tg-bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            position: relative;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-2px);
+            background: var(--tg-bg-tertiary);
+        }
+
+        .movie-poster {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            background: var(--tg-bg-tertiary);
+        }
+
+        .movie-badges {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            display: flex;
+            gap: 4px;
+        }
+
+        
+
+        .rating-badge {
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--tg-rating);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 3px;
+            font-weight: 10px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .star-icon {
+            color: var(--tg-rating);
+            font-size: 8px;
+        }
+
+        .movie-info {
+            padding: 12px;
+        }
+
+        .movie-title {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-year {
+            font-size: 11px;
+            color: var(--tg-text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .movie-genre {
+            font-size: 11px;
+            color: var(--tg-text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Bottom Navigation -保持不变 */
+        .tg-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--tg-bg-secondary);
+            border-top: 1px solid var(--tg-border);
+            display: flex;
+            padding: 8px 0;
+            max-width: 500px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .tg-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--tg-text-secondary);
+            padding: 8px 0;
+            transition: color 0.2s;
+        }
+
+        .tg-nav-item.active {
+            color: var(--tg-accent);
+        }
+
+        .tg-nav-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+
+        .tg-nav-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Modal Styles -保持不变 */
+        .tg-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--tg-bg);
+            z-index: 1000;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .tg-modal-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tg-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--tg-border);
+            background: var(--tg-bg-secondary);
+        }
+
+        .tg-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        /* Loading and Error states -保持不变 */
+        .tg-loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--tg-text-secondary);
+        }
+
+        .tg-loading-dots {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .tg-loading-dots div {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--tg-text-secondary);
+            animation: tg-bounce 1.4s infinite ease-in-out both;
+        }
+
+        .tg-error {
+            background: var(--tg-error);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px;
+            text-align: center;
+        }
+
+        @keyframes tg-bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+         /* Movie Details Modal - Updated with smaller layout */
+        .tg-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--tg-bg);
+            z-index: 1000;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .tg-modal-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tg-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--tg-border);
+            background: var(--tg-bg-secondary);
+        }
+
+        .tg-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+        
+
+          .movie-poster-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        background: var(--tg-bg-tertiary);
+        padding: 20px 0;
+    }
+    .movie-poster-container.img{
+      height: auto;
+      width: auto;
+    }
+
+    .movie-poster-natural {
+        max-width: 100%;
+        max-height: 300px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .movie-detail-content {
+        flex: 1;
+        padding: 16px;
+        background: var(--tg-bg);
+    }
+    
+    .movie-quality-badge {
+            background: var(--tg-accent);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+      
+
+        .movie-detail-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .movie-detail-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: var(--tg-text-secondary);
+            font-size: 14px;
+        }
+
+        .movie-detail-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--tg-rating);
+        }
+
+        .movie-detail-info {
+            margin-bottom: 16px;
+        }
+
+        .movie-detail-genre {
+            font-size: 14px;
+            color: var(--tg-text);
+            margin-bottom: 8px;
+        }
+
+        
+
+        .movie-detail-description {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: var(--tg-text);
+        }
+
+        .movie-detail-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .tg-btn-primary {
+            background: var(--tg-accent);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tg-btn-primary:hover {
+            background: var(--tg-accent-hover);
+        }
+
+        .tg-btn-secondary {
+            background: var(--tg-bg-tertiary);
+            color: var(--tg-text);
+            border: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tg-btn-secondary:hover {
+            background: var(--tg-border);
+        }
+
+        .action-icon {
+            font-size: 16px;
+        }
+
+        /* Rest of the styles remain the same... */
+    </style>
+</head>
+<body class="telegram-theme">
+    <!-- Telegram-like Header -->
+    <header class="tg-header">
+        
+            <div class="tg-header-info">
+                <h1>Tele Movies</h1>
+                <span class="tg-online" id="onlineStatus">loading...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="tg-search-container">
+        <div class="tg-search-box">
+            <span class="tg-search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search movies..." class="tg-search-input">
+        </div>
+    </div>
+
+    
+
+    <!-- Movies Grid -->
+    <main class="tg-main">
+        <div id="movieList" class="movies-grid">
+            <!-- Movies will be loaded here in grid format -->
+        </div>
+        
+        <div id="loading" class="tg-loading">
+            <div class="tg-loading-dots">
+                <div></div><div></div><div></div>
+            </div>
+            <span>Loading movies...</span>
+        </div>
+        
+        <div id="error" class="tg-error" style="display: none;"></div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="tg-bottom-nav">
+        <a href="index.html" class="tg-nav-item active">
+            <span class="tg-nav-icon">🎬</span>
+            <span class="tg-nav-text">Movies</span>
+        </a>
+        <a href="admin.html" class="tg-nav-item">
+            <span class="tg-nav-icon">⚙️</span>
+            <span class="tg-nav-text">Admin</span>
+        </a>
+    </nav>
+
+        <!-- Updated Movie Details Modal -->
+    <div id="movieModal" class="tg-modal">
+        <div class="tg-modal-content">
+            <div class="tg-modal-header">
+                <button class="tg-btn tg-btn-back" onclick="closeModal()">←</button>
+                <h3>Movie Details</h3>
+                <div style="width: 40px;"></div>
+            </div>
+            <div class="tg-modal-body">
+                <div id="modalContent" class="movie-detail-container">
+                    <!-- Movie details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        const tg = window.Telegram.WebApp;
+        
+        // App ကိုစပြီး initialize လုပ်တာ
+        tg.ready();
+        tg.expand(); // Screen အပြည့်ချဲ့ပါ
+        
+        // Telegram user information
+        const user = tg.initDataUnsafe.user;
+        if (user) {
+            console.log('Telegram User:', user);
+            // User name ကိုပြချင်ရင်
+            // document.getElementById('userName').textContent = user.first_name;
+        }
+        
+        // Back button setup
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                tg.close(); // App ကိုပိတ်ပါ
+            }
+        });
+        const API_URL ="https://movie-backend-puh6.onrender.com" ;
+
+        let allMovies = [];
+
+        // Load movies from backend
+        async function loadMovies() {
+            console.log("🔄 Loading movies from:", API_URL);
+            
+            showLoading(true);
+            hideError();
+
+            try {
+                const healthResponse = await fetch(`${API_URL}/health`);
+                const healthData = await healthResponse.json();
+                
+                document.getElementById('onlineStatus').textContent = `${healthData.movie_count} movies`;
+
+                const response = await fetch(`${API_URL}/api/movies`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                allMovies = await response.json();
+                console.log("✅ Movies loaded:", allMovies.length);
+                
+                displayMovies(allMovies);
+                
+            } catch (error) {
+                console.error('❌ Error loading movies:', error);
+                showError('Failed to load movies: ' + error.message);
+                document.getElementById('onlineStatus').textContent = "offline";
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Display movies in grid layout with badges
+        function displayMovies(movies) {
+            const movieList = document.getElementById('movieList');
+            
+            if (!movies || movies.length === 0) {
+                movieList.innerHTML = `
+                    <div class="tg-no-data" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--tg-text-secondary);">
+                        <p>No movies found</p>
+                        <p class="tg-text-secondary">Add movies in admin panel</p>
+                    </div>
+                `;
+                return;
+            }
+
+            movieList.innerHTML = movies.map(movie => `
+                <div class="movie-card" onclick="showMovieDetails(${movie.id})">
+                    <img src="${movie.image || 'https://via.placeholder.com/500x750/2d2d2d/ffffff?text=No+Image'}" 
+                         alt="${movie.title}" 
+                         class="movie-poster"
+                         onerror="this.src='https://via.placeholder.com/500x750/2d2d2d/ffffff?text=No+Image'">
+                    
+                    <div class="movie-badges">
+                        <div class="quality-badge">mmsub</div>
+                        <div class="rating-badge">
+                            <span class="star-icon">★</span> ${movie.genre || '7.0'}
+                        </div>
+                    </div>
+                    
+                    <div class="movie-info">
+                        <div class="movie-title">${movie.title}</div>
+                        <div class="movie-year">${movie.year || '2024'}</div>
+                        <div class="movie-genre">${movie.genre || 'General'}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Show movie details in modal - UPDATED with natural image size
+function showMovieDetails(movieId) {
+    const movie = allMovies.find(m => m.id === movieId);
+    if (!movie) return;
+
+    const modalContent = document.getElementById('modalContent');
+    
+    modalContent.innerHTML = `
+        <div class="movie-poster-container">
+            <img src="${movie.image || 'https://via.placeholder.com/300x450/2d2d2d/ffffff?text=No+Image'}" 
+                 alt="${movie.title}" 
+                 class="movie-poster-natural"
+                 onerror="this.src='https://via.placeholder.com/300x450/2d2d2d/ffffff?text=No+Image'">
+        </div>
+        
+        <div class="movie-detail-content">
+            
+            
+            <h1 class="movie-detail-title">${movie.title}</h1>
+            
+            <div class="movie-detail-meta">
+                <div class="movie-detail-rating">
+                    <span class="star-icon">★</span> ${movie.genre || '7.9'}
+                </div>
+                <span>•</span>
+                <span>${movie.year || '2025'}</span>
+            </div>
+            
+            <div class="movie-detail-info">
+                
+            </div>
+            
+            <p class="movie-detail-description">${movie.description || 'No description available'}</p>
+            
+            <div class="movie-detail-actions">
+                <button class="tg-btn-primary" onclick="openLink('${movie.telegram_video}')">
+                    <span class="action-icon">▶️</span>
+                    Watch on Telegram
+                </button>
+                <button class="tg-btn-secondary" onclick="openLink('${movie.telegram_group}')">
+                    <span class="action-icon">📢</span>
+                    Join Discussion Group
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('movieModal').style.display = 'block';
+}
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.trim().toLowerCase();
+                
+                if (searchTerm === '') {
+                    displayMovies(allMovies);
+                    return;
+                }
+                
+                const filteredMovies = allMovies.filter(movie => 
+                    movie.title.toLowerCase().includes(searchTerm) ||
+                    (movie.genre && movie.genre.toLowerCase().includes(searchTerm)) ||
+                    (movie.description && movie.description.toLowerCase().includes(searchTerm))
+                );
+                
+                displayMovies(filteredMovies);
+            });
+        }
+
+        // Utility functions
+        function openLink(url) {
+            if (url && url.startsWith('http')) {
+                window.open(url, '_blank');
+            } else {
+                alert('Invalid link');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('movieModal').style.display = 'none';
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = show ? 'block' : 'none';
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function hideError() {
+            const errorDiv = document.getElementById('error');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        // Auto-refresh every 30 seconds
+        function startAutoRefresh() {
+            setInterval(() => {
+                console.log("🔄 Auto-refreshing movies...");
+                loadMovies();
+            }, 30000);
+        }
+
+        // Modal click outside to close
+        function setupModal() {
+            const modal = document.getElementById('movieModal');
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMovies();
+            setupSearch();
+            setupModal();
+            startAutoRefresh();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Movie Channel</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --tg-bg: #0f0f0f;
+        --tg-bg-secondary: #1e1e1e;
+        --tg-bg-tertiary: #2d2d2d;
+        --tg-text: #ffffff;
+        --tg-text-secondary: #8e8e93;
+        --tg-accent: #2fabff;
+        --tg-accent-hover: #1e9aeb;
+        --tg-border: #3d3d3d;
+        --tg-success: #34c759;
+        --tg-error: #ff3b30;
+        --tg-warning: #ff9500;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: var(--tg-bg);
+        color: var(--tg-text);
+        line-height: 1.4;
+        max-width: 500px;
+        margin: 0 auto;
+        min-height: 100vh;
+        position: relative;
+        padding-bottom: 60px;
+      }
+
+      /* Telegram Header */
+      .tg-header {
+        background: var(--tg-bg-secondary);
+        border-bottom: 1px solid var(--tg-border);
+        padding: 12px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(10px);
+      }
+
+      .tg-header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .tg-header-info h1 {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+
+      .tg-subtitle {
+        font-size: 13px;
+        color: var(--tg-text-secondary);
+      }
+
+      .tg-btn {
+        background: none;
+        border: none;
+        color: var(--tg-text);
+        font-size: 20px;
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background 0.2s;
+      }
+
+      .tg-btn:hover {
+        background: var(--tg-bg-tertiary);
+      }
+
+      /* Main Content */
+      .tg-main {
+        padding: 0;
+      }
+
+      .tg-section {
+        padding: 16px;
+      }
+
+      /* Telegram Cards */
+      .tg-card {
+        background: var(--tg-bg-secondary);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border: 1px solid var(--tg-border);
+      }
+
+      .tg-card h3 {
+        margin-bottom: 12px;
+        font-size: 17px;
+        font-weight: 600;
+      }
+
+      /* Input Groups */
+      .tg-input-group {
+        margin-bottom: 16px;
+      }
+
+      .tg-input-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 14px;
+        color: var(--tg-text-secondary);
+        font-weight: 500;
+      }
+
+      .tg-input,
+      .tg-textarea {
+        width: 100%;
+        background: var(--tg-bg-tertiary);
+        border: 1px solid var(--tg-border);
+        border-radius: 8px;
+        padding: 12px;
+        color: var(--tg-text);
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      .tg-input:focus,
+      .tg-textarea:focus {
+        border-color: var(--tg-accent);
+      }
+
+      .tg-textarea {
+        resize: vertical;
+        min-height: 80px;
+        font-family: inherit;
+      }
+
+      .tg-form-row {
+        display: flex;
+        gap: 12px;
+      }
+
+      /* Buttons */
+      .tg-btn-primary {
+        background: var(--tg-accent);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+        width: 100%;
+      }
+
+      .tg-btn-primary:hover {
+        background: var(--tg-accent-hover);
+      }
+
+      .tg-btn-full {
+        width: 100%;
+      }
+
+      .tg-btn-danger {
+        background: var(--tg-error);
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .tg-btn-danger:hover {
+        background: #e0352a;
+      }
+
+      /* Bottom Navigation */
+      .tg-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--tg-bg-secondary);
+        border-top: 1px solid var(--tg-border);
+        display: flex;
+        padding: 8px 0;
+        max-width: 500px;
+        margin: 0 auto;
+        backdrop-filter: blur(10px);
+      }
+
+      .tg-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: var(--tg-text-secondary);
+        padding: 8px 0;
+        transition: color 0.2s;
+      }
+
+      .tg-nav-item.active {
+        color: var(--tg-accent);
+      }
+
+      .tg-nav-icon {
+        font-size: 20px;
+        margin-bottom: 2px;
+      }
+
+      .tg-nav-text {
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      /* Loading Animation */
+      .tg-loading {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--tg-text-secondary);
+      }
+
+      .tg-loading-dots {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+        margin-bottom: 12px;
+      }
+
+      .tg-loading-dots div {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--tg-text-secondary);
+        animation: tg-bounce 1.4s infinite ease-in-out both;
+      }
+
+      .tg-loading-dots div:nth-child(1) {
+        animation-delay: -0.32s;
+      }
+      .tg-loading-dots div:nth-child(2) {
+        animation-delay: -0.16s;
+      }
+
+      @keyframes tg-bounce {
+        0%,
+        80%,
+        100% {
+          transform: scale(0);
+        }
+        40% {
+          transform: scale(1);
+        }
+      }
+
+      /* Error States */
+      .tg-error {
+        background: var(--tg-error);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin: 16px;
+        text-align: center;
+      }
+
+      .tg-error-message {
+        background: rgba(255, 59, 48, 0.1);
+        color: var(--tg-error);
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 12px;
+        border: 1px solid var(--tg-error);
+        text-align: center;
+      }
+
+      .tg-text-secondary {
+        color: var(--tg-text-secondary);
+        font-size: 14px;
+      }
+
+      /* Admin List */
+      .tg-admin-list {
+        margin-top: 16px;
+      }
+
+      .tg-admin-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid var(--tg-border);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        background: var(--tg-bg-tertiary);
+      }
+
+      .tg-admin-thumb {
+        width: 40px;
+        height: 50px;
+        border-radius: 4px;
+        object-fit: cover;
+        margin-right: 12px;
+        background: var(--tg-bg);
+      }
+
+      .tg-admin-info {
+        flex: 1;
+      }
+
+      .tg-admin-title {
+        font-size: 15px;
+        font-weight: 500;
+        margin-bottom: 2px;
+      }
+
+      .tg-admin-meta {
+        font-size: 13px;
+        color: var(--tg-text-secondary);
+      }
+
+      .tg-admin-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      /* Image Preview */
+      #imagePreview {
+        margin-top: 10px;
+        text-align: center;
+        display: none;
+      }
+
+      #previewImg {
+        max-width: 200px;
+        max-height: 150px;
+        border-radius: 8px;
+        border: 2px solid var(--tg-accent);
+      }
+
+      /* No Data States */
+      .tg-no-data {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--tg-text-secondary);
+        font-style: italic;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--tg-bg);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--tg-border);
+        border-radius: 2px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--tg-text-secondary);
+      }
+    </style>
+  </head>
+  <body class="telegram-theme">
+    <!-- Telegram-like Header -->
+    <header class="tg-header">
+      <div class="tg-header-content">
+        <button class="tg-btn tg-btn-back" onclick="window.history.back()">
+          ←
+        </button>
+        <div class="tg-header-info">
+          <h1>Admin Panel</h1>
+          <span class="tg-subtitle">Manage Movies</span>
+        </div>
+        <button class="tg-btn tg-btn-menu">⋮</button>
+      </div>
+    </header>
+
+    <main class="tg-main">
+      <!-- Login Section -->
+      <section id="loginSection" class="tg-section">
+        <div class="tg-card">
+          <h3>🔐 Admin Access</h3>
+          <p class="tg-text-secondary">Enter password to manage movies</p>
+
+          <div class="tg-input-group">
+            <input
+              type="password"
+              id="adminPassword"
+              placeholder="Enter admin password"
+              class="tg-input"
+            />
+          </div>
+
+          <button onclick="handleLogin()" class="tg-btn-primary">Login</button>
+          <div id="loginError" class="tg-error-message" style="display: none">
+            ❌ Incorrect password!
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin Panel -->
+      <section id="adminPanel" class="tg-section" style="display: none">
+        <!-- Add Movie Form -->
+        <div class="tg-card">
+          <h3>➕ Add New Movie</h3>
+          <form id="movieForm">
+            <div class="tg-input-group">
+              <label>Movie Title</label>
+              <input
+                type="text"
+                id="movieTitle"
+                placeholder="Enter movie title"
+                class="tg-input"
+                required
+              />
+            </div>
+
+            <div class="tg-input-group">
+              <label>Description</label>
+              <textarea
+                id="movieDesc"
+                placeholder="Enter movie description"
+                class="tg-textarea"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <div class="tg-input-group">
+              <label>Image URL</label>
+              <input
+                type="url"
+                id="movieImage"
+                placeholder="https://ibb.co/... or direct image URL"
+                class="tg-input"
+              />
+              <small class="tg-text-secondary">
+                💡 Upload to:
+                <a
+                  href="https://telegra.ph"
+                  target="_blank"
+                  style="color: var(--tg-accent)"
+                  >Telegraph</a
+                >
+                or
+                <a
+                  href="https://imgbb.com"
+                  target="_blank"
+                  style="color: var(--tg-accent)"
+                  >ImgBB</a
+                >
+              </small>
+
+              <!-- Image Preview -->
+              <div id="imagePreview">
+                <img id="previewImg" src="" />
+                <p
+                  style="
+                    font-size: 12px;
+                    margin-top: 5px;
+                    color: var(--tg-accent);
+                  "
+                >
+                  ✅ Image Preview
+                </p>
+              </div>
+            </div>
+
+            <div class="tg-input-group">
+              <label>Telegram Video Link</label>
+              <input
+                type="url"
+                id="movieVideo"
+                placeholder="https://t.me/movies/123"
+                class="tg-input"
+                required
+              />
+            </div>
+
+            <div class="tg-input-group">
+              <label>Telegram Group Link</label>
+              <input
+                type="url"
+                id="movieGroup"
+                placeholder="https://t.me/joinchat/ABC123"
+                class="tg-input"
+                required
+              />
+            </div>
+
+            <div class="tg-form-row">
+              <div class="tg-input-group" style="flex: 1">
+                <label>Genre</label>
+                <input
+                  type="text"
+                  id="movieGenre"
+                  placeholder="Action, Comedy..."
+                  class="tg-input"
+                />
+              </div>
+
+              <div class="tg-input-group" style="flex: 1">
+                <label>Year</label>
+                <input
+                  type="number"
+                  id="movieYear"
+                  placeholder="2024"
+                  class="tg-input"
+                  min="1900"
+                  max="2030"
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="tg-btn-primary tg-btn-full">
+              Add Movie
+            </button>
+          </form>
+        </div>
+
+        <!-- Movies List -->
+        <div class="tg-card">
+          <h3>📁 Existing Movies</h3>
+          <div id="loading" class="tg-loading" style="display: none">
+            <div class="tg-loading-dots">
+              <div></div>
+              <div></div>
+              <div></div>
+            </div>
+            <span>Loading movies...</span>
+          </div>
+          <div id="movieList" class="tg-admin-list">
+            <!-- Movies will be loaded here -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="tg-bottom-nav">
+      <a href="index.html" class="tg-nav-item">
+        <span class="tg-nav-icon">🎬</span>
+        <span class="tg-nav-text">Movies</span>
+      </a>
+      <a href="admin.html" class="tg-nav-item active">
+        <span class="tg-nav-icon">⚙️</span>
+        <span class="tg-nav-text">Admin</span>
+      </a>
+    </nav>
+
+    <script>
+      const API_URL = "https://movie-backend-puh6.onrender.com";
+      let adminToken = localStorage.getItem("admin_token");
+
+      // Check authentication and show appropriate section
+      function checkAuth() {
+        const loginSection = document.getElementById("loginSection");
+        const adminPanel = document.getElementById("adminPanel");
+
+        if (adminToken) {
+          // User is logged in
+          loginSection.style.display = "none";
+          adminPanel.style.display = "block";
+          loadMovies();
+          return true;
+        } else {
+          // User not logged in
+          loginSection.style.display = "block";
+          adminPanel.style.display = "none";
+          return false;
+        }
+      }
+
+      // Handle login
+      async function handleLogin() {
+        const passwordInput = document.getElementById("adminPassword");
+        const loginError = document.getElementById("loginError");
+        const password = passwordInput.value;
+
+        if (!password) {
+          loginError.textContent = "❌ Password is required!";
+          loginError.style.display = "block";
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_URL}/api/admin/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: password }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            adminToken = result.token;
+            localStorage.setItem("admin_token", adminToken);
+            checkAuth(); // Update UI
+          } else {
+            loginError.textContent = "❌ " + (result.message || "Login failed");
+            loginError.style.display = "block";
+          }
+        } catch (error) {
+          loginError.textContent = "❌ Login error: " + error.message;
+          loginError.style.display = "block";
+        }
+      }
+
+      // Protected fetch
+
+      // Load movies
+      async function loadMovies() {
+        const loading = document.getElementById("loading");
+        const movieList = document.getElementById("movieList");
+
+        try {
+          loading.style.display = "block";
+          movieList.innerHTML = "";
+
+          const response = await fetch(`${API_URL}/api/movies`);
+          const movies = await response.json();
+
+          if (movies.length === 0) {
+            movieList.innerHTML =
+              '<p class="tg-text-secondary">No movies found</p>';
+            return;
+          }
+
+          movieList.innerHTML = movies
+            .map(
+              (movie) =>
+                `<div class="tg-admin-item">
+                <div class="tg-admin-item-content">
+                  <h4>${movie.title || "No Title"}</h4>
+                  <p class="tg-text-secondary">
+                    ${movie.year || "N/A"} • ${movie.genre || "No Genre"}
+                  </p>
+                  <p>${movie.description || "No description"}</p>
+                </div>
+                <button
+                  onclick="deleteMovie(${movie.id})"
+                  class="tg-btn-danger"
+                >
+                  Delete
+                </button>
+              </div>`
+            )
+            .join("");
+        } catch (error) {
+          movieList.innerHTML =
+            '<p class="tg-error-message">Error loading movies</p>';
+          console.error("Error loading movies:", error);
+        } finally {
+          loading.style.display = "none";
+        }
+      }
+
+      // Add movie
+      // Add movie - FIXED VERSION
+      async function addMovie(event) {
+        event.preventDefault();
+
+        if (!checkAuth()) return;
+
+        const movieData = {
+          title: document.getElementById("movieTitle").value,
+          year: parseInt(document.getElementById("movieYear").value) || 2024,
+          genre: document.getElementById("movieGenre").value || "General",
+          description:
+            document.getElementById("movieDesc").value || "No description",
+          image: document.getElementById("movieImage").value || "",
+
+          telegram_video: document.getElementById("movieVideo").value,
+          telegram_group: document.getElementById("movieGroup").value,
+        };
+
+        let imageUrl = movieData.image.trim();
+        if (imageUrl.includes("ibb.co") && !imageUrl.includes("i.ibb.co")) {
+          const parts = imageUrl.split("/");
+          const code = parts[parts.length - 1];
+          movieData.image = `https://i.ibb.co/${code}/image.jpg`;
+        }
+
+        // Validate
+        if (
+          !movieData.title ||
+          !movieData.telegram_video ||
+          !movieData.telegram_group
+        ) {
+          alert("Please fill in Title, Video Link and Group Link");
+          return;
+        }
+
+        try {
+          console.log("Sending movie data:", movieData);
+
+          const response = await protectedFetch(`${API_URL}/api/admin/movies`, {
+            method: "POST",
+            body: JSON.stringify(movieData),
+          });
+
+          const result = await response.json();
+          console.log("Add movie response:", result);
+
+          if (result.success) {
+            alert("🎉 Movie added successfully!");
+            document.getElementById("movieForm").reset();
+            document.getElementById("imagePreview").style.display = "none";
+            loadMovies();
+          } else {
+            alert(
+              "❌ Failed to add movie: " + (result.error || "Unknown error")
+            );
+          }
+        } catch (error) {
+          console.error("Add movie error:", error);
+          alert("❌ Error: " + error.message);
+        }
+      }
+
+      // Delete movie - FIXED VERSION
+      async function deleteMovie(movieId) {
+        if (!checkAuth()) return;
+
+        if (!confirm("Are you sure you want to delete this movie?")) return;
+
+        try {
+          console.log("Deleting movie ID:", movieId);
+
+          const response = await protectedFetch(
+            `${API_URL}/api/admin/movies/${movieId}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          const result = await response.json();
+          console.log("Delete movie response:", result);
+
+          if (result.success) {
+            alert("✅ Movie deleted successfully!");
+            loadMovies();
+          } else {
+            alert(
+              "❌ Failed to delete movie: " + (result.error || "Unknown error")
+            );
+          }
+        } catch (error) {
+          console.error("Delete movie error:", error);
+          alert("❌ Error: " + error.message);
+        }
+      }
+
+      // Protected fetch with better error handling
+      async function protectedFetch(url, options = {}) {
+        if (!adminToken) {
+          alert("Please login first");
+          checkAuth();
+          throw new Error("Not authenticated");
+        }
+
+        options.headers = {
+          Authorization: ` Bearer ${adminToken}`,
+          "Content-Type": "application/json",
+          ...options.headers,
+        };
+
+        const response = await fetch(url, options);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response;
+      }
+
+      // Image preview
+      // Image preview with ImgBB support
+      function setupImagePreview() {
+        const imageInput = document.getElementById("movieImage");
+        const previewDiv = document.getElementById("imagePreview");
+        const previewImg = document.getElementById("previewImg");
+
+        imageInput.addEventListener("input", function () {
+          let imageUrl = this.value.trim();
+
+          // Convert ImgBB page URL to direct image URL
+          if (imageUrl.includes("ibb.co") && !imageUrl.includes("i.ibb.co")) {
+            // If it's a page URL like https://ibb.co/abc123
+            // Try to convert to direct link
+            const parts = imageUrl.split("/");
+            const code = parts[parts.length - 1];
+            imageUrl = `https://i.ibb.co/${code}/image.jpg`;
+          }
+
+          if (imageUrl) {
+            previewImg.src = imageUrl;
+            previewImg.onerror = function () {
+              previewDiv.innerHTML =
+                '<p style="color: red;">❌ Invalid image URL</p>';
+            };
+            previewImg.onload = function () {
+              previewDiv.style.display = "block";
+            };
+            previewDiv.style.display = "block";
+          } else {
+            previewDiv.style.display = "none";
+          }
+        });
+      }
+
+      // Logout function
+      function logout() {
+        localStorage.removeItem("admin_token");
+        adminToken = null;
+        checkAuth();
+        document.getElementById("adminPassword").value = "";
+      }
+
+      // Add logout button to header
+      function addLogoutButton() {
+        const header = document.querySelector(".tg-header-content");
+        const logoutBtn = document.createElement("button");
+        logoutBtn.className = "tg-btn";
+        logoutBtn.innerHTML = "🚪";
+        logoutBtn.title = "Logout";
+        logoutBtn.onclick = logout;
+        header.appendChild(logoutBtn);
+      }
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        // Setup form
+        const form = document.getElementById("movieForm");
+        if (form) {
+          form.addEventListener("submit", addMovie);
+        }
+
+        // Setup image preview
+        setupImagePreview();
+
+        // Check authentication
+        checkAuth();
+
+        // Add logout button if logged in
+        if (adminToken) {
+          addLogoutButton();
+        }
+      });
+    </script>
+  </body>
+</html>
