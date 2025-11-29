@@ -567,32 +567,7 @@
 
 
     <script>
-
-        const tg = window.Telegram.WebApp;
-        
-        // App ကိုစပြီး initialize လုပ်တာ
-        tg.ready();
-        tg.expand(); // Screen အပြည့်ချဲ့ပါ
-        
-        // Telegram user information
-        const user = tg.initDataUnsafe.user;
-        if (user) {
-            console.log('Telegram User:', user);
-            // User name ကိုပြချင်ရင်
-            // document.getElementById('userName').textContent = user.first_name;
-        }
-        
-        // Back button setup
-        tg.BackButton.show();
-        tg.BackButton.onClick(() => {
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                tg.close(); // App ကိုပိတ်ပါ
-            }
-        });
-        const API_URL ="https://movie-backend-puh6.onrender.com" ;
-
+        const API_URL = "https://movie-backend-puh6.onrender.com";
         let allMovies = [];
 
         // Load movies from backend
